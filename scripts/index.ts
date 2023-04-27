@@ -142,21 +142,22 @@ window.onload = async () => {
   };
 
   start_btn.addEventListener("click", () => {
-    state.running = true;
+    if (!state.running) {
+      state.running = true;
 
-    const aux = (world: World) => {
-      const newWorld = step(world);
+      const loop = (world: World) => {
+        setTimeout(() => {
+          const newWorld = step(world);
+          drawWorld(newWorld, context);
+  
+          if (state.running) {
+            loop(newWorld);
+          }
+        }, 100);
+      };
 
-      setTimeout(() => {
-        drawWorld(newWorld, context);
-
-        if (state.running) {
-          aux(newWorld);
-        }
-      }, 100);
-    };
-
-    aux(state.world);
+      loop(state.world);
+    }
   });
 
   clear_btn.addEventListener("click", () => {

@@ -96,17 +96,19 @@ window.onload = async () => {
         running: false,
     };
     start_btn.addEventListener("click", () => {
-        state.running = true;
-        const aux = (world) => {
-            const newWorld = step(world);
-            setTimeout(() => {
-                drawWorld(newWorld, context);
-                if (state.running) {
-                    aux(newWorld);
-                }
-            }, 100);
-        };
-        aux(state.world);
+        if (!state.running) {
+            state.running = true;
+            const loop = (world) => {
+                setTimeout(() => {
+                    const newWorld = step(world);
+                    drawWorld(newWorld, context);
+                    if (state.running) {
+                        loop(newWorld);
+                    }
+                }, 100);
+            };
+            loop(state.world);
+        }
     });
     clear_btn.addEventListener("click", () => {
         state.world = createWorld();
