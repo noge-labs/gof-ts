@@ -11,10 +11,10 @@ type World = {
   size: number;
 };
 
-type Coordinate = {
-  x: number;
-  y: number;
-};
+type Program = {
+  world: World,
+  running: boolean,
+}
 
 const createCell = (alive = false): Cell => ({
   alive: alive ? 1 : 0,
@@ -48,7 +48,7 @@ const shouldLive = (world: World, alive: boolean, index: number): boolean => {
   return liveNeibhbors === 3 ? true : liveNeibhbors === 2 ? alive : false;
 };
 
-const getCoordinatesForIndex = (world: World, index: number): Coordinate => ({
+const getCoordinatesForIndex = (world: World, index: number): { x: number, y: number } => ({
   x: index % world.size,
   y: Math.floor(index / world.size),
 });
@@ -119,11 +119,6 @@ const tryGetElementById = (id: string): HTMLElement => {
   return element;
 };
 
-interface GOF {
-  world: World;
-  running: boolean;
-}
-
 window.onload = async () => {
   const start_btn = tryGetElementById("start_btn") as HTMLButtonElement;
   const clear_btn = tryGetElementById("clear_btn") as HTMLButtonElement;
@@ -136,7 +131,7 @@ window.onload = async () => {
   context.fillStyle = "#000000"
   context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-  const state: GOF = {
+  const state: Program = {
     world: createWorld(),
     running: false,
   };
@@ -149,7 +144,7 @@ window.onload = async () => {
         setTimeout(() => {
           const newWorld = step(world);
           drawWorld(newWorld, context);
-  
+
           if (state.running) {
             loop(newWorld);
           }
@@ -167,29 +162,27 @@ window.onload = async () => {
     drawWorld(state.world, context);
   });
 
-  canvas.addEventListener(
-    "click",
-    (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
+  canvas.addEventListener("click", (event: MouseEvent) => {
+    const rect = canvas.getBoundingClientRect();
 
-      const S = SQUARE_SIZE;
-      const x = Math.floor((event.clientX - rect.left) / SQUARE_SIZE);
-      const y = Math.floor((event.clientY - rect.top) / SQUARE_SIZE);
+    const S = SQUARE_SIZE;
+    const x = Math.floor((event.clientX - rect.left) / SQUARE_SIZE);
+    const y = Math.floor((event.clientY - rect.top) / SQUARE_SIZE);
 
-      const cell = state.world.cells[y * S + x];
+    const cell = state.world.cells[y * S + x];
 
-      if (cell.alive) {
-        // cell is alive, make it dead and change color to black
-        context.fillStyle = "#000000";
-        context.fillRect(x * S, y * S, S, S);
-        cell.alive = 0;
-      } else {
-        // cell is dead, make it alive and change color to white
-        context.fillStyle = "#FFFFFF";
-        context.fillRect(x * S, y * S, S, S);
-        cell.alive = 1;
-      }
-    },
+    if (cell.alive) {
+      // cell is alive, make it dead and change color to black
+      context.fillStyle = "#000000";
+      context.fillRect(x * S, y * S, S, S);
+      cell.alive = 0;
+    } else {
+      // cell is dead, make it alive and change color to white
+      context.fillStyle = "#FFFFFF";
+      context.fillRect(x * S, y * S, S, S);
+      cell.alive = 1;
+    }
+  },
     true
   );
 };
